@@ -2,6 +2,7 @@ import unittest
 import tweepy
 import requests
 import json
+import sys
 
 def uprint(*objects, sep=' ', end='\n', file=sys.stdout):
     enc = file.encoding
@@ -58,7 +59,7 @@ consumer_key = ""
 consumer_secret = ""
 access_token = ""
 access_token_secret = ""
-import twitter_info.py
+import twitter_info
 consumer_key = twitter_info.consumer_key
 consumer_secret = twitter_info.consumer_secret
 access_token = twitter_info.access_token
@@ -91,20 +92,19 @@ except:
 ## 		so it either gets new data or caches data, depending upon what the input 
 ##		to search for is. 
 def getTweetsWithCaching(search_term):
-
     if search_term in CACHE_DICTION:
         print("Data was in the cache")
         return CACHE_DICTION[loc]
     else:
         print("Making a request for new data...")
-        data = api.search(q=search_term)
+        data = api.search(search_term)
         try:
-            CACHE_DICTION[loc] =  json.loads(data)
-            dumped_json_cache = json.dumps(CACHE_DICTION)
-            fw = open(CACHE_FNAME,"w")
-            fw.write(dumped_json_cache)
-            fw.close() # Close the open file
-            return CACHE_DICTION[loc]
+        	CACHE_DICTION[loc] =  json.loads(data)
+        	dumped_json_cache = json.dumps(CACHE_DICTION)
+        	fw = open(CACHE_FNAME,"w")
+        	fw.write(dumped_json_cache)
+        	fw.close() # Close the open file
+        	return CACHE_DICTION[loc]
         except:
             print("Wasn't in cache and wasn't valid search either")
             return None
@@ -112,8 +112,9 @@ def getTweetsWithCaching(search_term):
 
 ## 3. Using a loop, invoke your function, save the return value in a variable, and explore the 
 ##		data you got back!
-for i in range(3):
-
+for i in range(1):
+	michigan_data = getTweetsWithCaching('Michigan')
+	uprint(michigan_data)
 
 ## 4. With what you learn from the data -- e.g. how exactly to find the 
 ##		text of each tweet in the big nested structure -- write code to print out 
