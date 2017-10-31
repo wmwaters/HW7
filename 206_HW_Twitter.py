@@ -79,7 +79,7 @@ api = tweepy.API(auth, parser=tweepy.parsers.JSONParser())
 ## 		statement shown in class.
 CACHE_FNAME = 'cache_twitter.json' # String for your file. We want the JSON file type, bcause that way, we can easily get the information into a Python dictionary!
 
-def cacheddata():
+def cacheddata(): #set-up cache
 	cache = {}
 	try:
 		cached = open("cache_twitter.json",'r')
@@ -95,9 +95,9 @@ def cacheddata():
 ##		to search for is. 
 def getTweetsWithCaching(search_term):
 	cache = cacheddata()
-	if search_term in cache.keys():
+	if search_term in cache.keys(): #checking cache for search term and if found, returning
 		return [{search_term: cache[search_term]},"using cache"]
-	else:
+	else: #if not in cache, pinging Twitter API for search results and storing in cache
 		api = tweepy.API(auth, parser=tweepy.parsers.JSONParser())
 		result = api.search(q=search_term)
 		tweets = []
@@ -114,13 +114,13 @@ def getTweetsWithCaching(search_term):
 ## 3. Using a loop, invoke your function, save the return value in a variable, and explore the 
 ##		data you got back!
 i = 0
-while (i < 3):
+while (i < 3): #running three times
 	uinput = input("Enter Tweet term: ")
-	obj = getTweetsWithCaching(uinput)
+	obj = getTweetsWithCaching(uinput) #this does the work
 	print(obj[1])
 	for tweet in obj[0][uinput]:
 		print("\n")
-		uprint("TEXT: ",tweet['text'])
+		uprint("TEXT: ",tweet['text']) #uprint due to encoding issues
 		print("Created at: ", tweet['created_at'],"\n\n")
 	i+=1
 
