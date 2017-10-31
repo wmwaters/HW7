@@ -5,17 +5,17 @@ import json
 import sys
 
 def uprint(*objects, sep=' ', end='\n', file=sys.stdout):
-    enc = file.encoding
-    if enc == 'UTF-8':
-        print(*objects, sep=sep, end=end, file=file)
-    else:
-        f = lambda obj: str(obj).encode(enc, errors='backslashreplace').decode(enc)
-        print(*map(f, objects), sep=sep, end=end, file=file)
+	enc = file.encoding
+	if enc == 'UTF-8':
+		print(*objects, sep=sep, end=end, file=file)
+	else:
+		f = lambda obj: str(obj).encode(enc, errors='backslashreplace').decode(enc)
+		print(*map(f, objects), sep=sep, end=end, file=file)
 
 ## SI 206 - HW
 ## COMMENT WITH: William Waters
 ## Your section day/time: Wednesday 6-7pm
-## Any names of people you worked with on this assignment:
+## Any names of people you worked with on this assignment: Austin McCall
 
 
 ## Write code that uses the tweepy library to search for tweets with three different phrases of the 
@@ -79,42 +79,50 @@ api = tweepy.API(auth, parser=tweepy.parsers.JSONParser())
 ## 		statement shown in class.
 CACHE_FNAME = 'cache_twitter.json' # String for your file. We want the JSON file type, bcause that way, we can easily get the information into a Python dictionary!
 
-try:
-    cache_file = open(CACHE_FNAME, 'r') # Try to read the data from the file
-    cache_contents = cache_file.read()  # If it's there, get it into a string
-    CACHE_DICTION = json.loads(cache_contents) # And then load it into a dictionary
-    cache_file.close() # Close the file, we're good, we got the data in a dictionary.
-except:
-    CACHE_DICTION = {}
+def cacheddata():
+	cache = {}
+	try:
+		cached = open("cache_twitter.json",'r')
+		cache = json.load(cached)
+		cached.close()
+	except:
+		pass
+	return cache
 
 
 ## 2. Write a function to get twitter data that works with the caching pattern, 
 ## 		so it either gets new data or caches data, depending upon what the input 
 ##		to search for is. 
 def getTweetsWithCaching(search_term):
-    if search_term in CACHE_DICTION:
-        print("Data was in the cache")
-        return CACHE_DICTION[loc]
-    else:
-        print("Making a request for new data...")
-        data = api.search(search_term)
-        try:
-        	CACHE_DICTION[loc] =  json.loads(data)
-        	dumped_json_cache = json.dumps(CACHE_DICTION)
-        	fw = open(CACHE_FNAME,"w")
-        	fw.write(dumped_json_cache)
-        	fw.close() # Close the open file
-        	return CACHE_DICTION[loc]
-        except:
-            print("Wasn't in cache and wasn't valid search either")
-            return None
+	cache = cacheddata()
+	if search_term in cache.keys():
+		return [{search_term: cache[search_term]},"using cache"]
+	else:
+		api = tweepy.API(auth, parser=tweepy.parsers.JSONParser())
+		result = api.search(q=search_term)
+		tweets = []
+		for tweet in result["statuses"]:
+			if len(tweets)<5:
+				if search_term in tweet["text"]:
+					tweets.append(tweet)
+		cache[search_term]=tweets
+		cachewrite = open("cache_twitter.json",'w')
+		json.dump(cache,cachewrite)
+		return [{search_term:tweets},"fetching from Twitter"]
 
 
 ## 3. Using a loop, invoke your function, save the return value in a variable, and explore the 
 ##		data you got back!
-for i in range(1):
-	michigan_data = getTweetsWithCaching('Michigan')
-	uprint(michigan_data)
+i = 0
+while (i < 3):
+	uinput = input("Enter Tweet term: ")
+	obj = getTweetsWithCaching(uinput)
+	print(obj[1])
+	for tweet in obj[0][uinput]:
+		print("\n")
+		uprint("TEXT: ",tweet['text'])
+		print("Created at: ", tweet['created_at'],"\n\n")
+	i+=1
 
 ## 4. With what you learn from the data -- e.g. how exactly to find the 
 ##		text of each tweet in the big nested structure -- write code to print out 
